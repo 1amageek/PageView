@@ -1,118 +1,98 @@
 //
 //  PageView.swift
 //
-//  Created by nori on 2021/01/29.
+//  Created by nori on 2021/02/03.
 //
 
-import UIKit
 import SwiftUI
+import UIKit
 
-struct PageViewController: UIViewControllerRepresentable {
+public struct PageNavigation {
 
-    var controllers: [UIViewController]
+    public var page: Int
 
-    @Binding var currentPage: Int
+    public var direction: UIPageViewController.NavigationDirection
+    
+    public var animated: Bool
 
-    var direction: UIPageViewController.NavigationDirection
-
-    var animated: Bool
-
-    init(_ controllers: [UIViewController],
-         currentPage: Binding<Int>,
-         direction: UIPageViewController.NavigationDirection,
-         animated: Bool) {
-        self.controllers = controllers
-        self._currentPage = currentPage
+    public init(_ page: Int, direction: UIPageViewController.NavigationDirection = .forward, animated: Bool = true) {
+        self.page = page
         self.direction = direction
         self.animated = animated
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+    public static func forward(_ page: Int) -> PageNavigation {
+        return .init(page, direction: .forward)
     }
 
-    func makeUIViewController(context: Context) -> UIPageViewController {
-        let pageViewController = UIPageViewController(
-            transitionStyle: .scroll,
-            navigationOrientation: .horizontal)
-        pageViewController.dataSource = context.coordinator
-        pageViewController.delegate = context.coordinator
-        return pageViewController
+    public static func reverse(_ page: Int) -> PageNavigation {
+        return .init(page, direction: .reverse)
     }
+}
 
-    func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-        pageViewController.setViewControllers([controllers[currentPage]],
-                                              direction: direction,
-                                              animated: animated)
-    }
+public struct PageConfiguration {
 
-    class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+    public var orientation: UIPageViewController.NavigationOrientation
 
-        var parent: PageViewController
+    public var transitionStyle: UIPageViewController.TransitionStyle
 
-        init(_ pageViewController: PageViewController) {
-            self.parent = pageViewController
-        }
+    public var looping: Bool
 
-        func pageViewController(
-            _ pageViewController: UIPageViewController,
-            viewControllerBefore viewController: UIViewController) -> UIViewController? {
-            guard let index = parent.controllers.firstIndex(of: viewController) else {
-                return nil
-            }
-            if index == 0 {
-                return nil
-            }
-            return parent.controllers[index - 1]
-        }
-
-        func pageViewController(
-            _ pageViewController: UIPageViewController,
-            viewControllerAfter viewController: UIViewController) -> UIViewController? {
-            guard let index = parent.controllers.firstIndex(of: viewController) else {
-                return nil
-            }
-            if index + 1 == parent.controllers.count {
-                return nil
-            }
-            return parent.controllers[index + 1]
-        }
-
-        func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-            if completed,
-                let visibleViewController = pageViewController.viewControllers?.first,
-                let index = parent.controllers.firstIndex(of: visibleViewController)
-            {
-                parent.currentPage = index
-            }
-        }
+    public init(orientation: UIPageViewController.NavigationOrientation = .horizontal,
+                transitionStyle: UIPageViewController.TransitionStyle = .scroll,
+                looping: Bool = false) {
+        self.orientation = orientation
+        self.transitionStyle = transitionStyle
+        self.looping = looping
     }
 }
 
 public struct PageView<Page: View>: View {
 
-    public var viewControllers: [UIHostingController<Page>]
+    public var pages: [Page]
 
-    @Binding public var currentPage: Int
+    @Binding public var navigation: PageNavigation
 
-    public var direction: UIPageViewController.NavigationDirection
+    public var configuration: PageConfiguration
 
-    public var animated: Bool
-
-    public init(_ views: [Page],
-         currentPage: Binding<Int>,
-         direction: UIPageViewController.NavigationDirection = .forward,
-         animated: Bool = true) {
-        self.viewControllers = views.map { UIHostingController(rootView: $0) }
-        self._currentPage = currentPage
-        self.direction = direction
-        self.animated = animated
+    public init(_ pages: [Page], navigation: Binding<PageNavigation>, configuration: PageConfiguration = PageConfiguration()) {
+        self.pages = pages
+        self._navigation = navigation
+        self.configuration = configuration
     }
 
     public var body: some View {
-        PageViewController(viewControllers,
-                           currentPage: $currentPage,
-                           direction: direction,
-                           animated: animated)
+        PageViewController(pages: pages,
+                           currentPage: $navigation[keyPath: \.page],
+                           orientation: configuration.orientation,
+                           direction: navigation.direction,
+                           transitionStyle: configuration.transitionStyle,
+                           animated: navigation.animated,
+                           looping: configuration.looping)
+    }
+}
+
+struct PageView_Previews: PreviewProvider {
+    struct ContentView: View {
+
+        @State var navigation: PageNavigation = .init(0)
+
+        var body: some View {
+            PageView([
+                Button("0", action: {
+                    self.navigation.page += 1
+                }),
+                Button("1", action: {
+                    self.navigation.page += 1
+                }),
+                Button("2", action: {
+                    self.navigation = .reverse(0)
+                })
+            ], navigation: $navigation)
+        }
+    }
+
+    static var previews: some View {
+        ContentView()
     }
 }
