@@ -7,7 +7,7 @@
 import SwiftUI
 import UIKit
 
-public struct PageNavigation {
+public struct PageNavigation: ExpressibleByIntegerLiteral {
 
     public var page: Int
 
@@ -27,6 +27,16 @@ public struct PageNavigation {
 
     public static func reverse(_ page: Int) -> PageNavigation {
         return .init(page, direction: .reverse)
+    }
+
+    public static func direct(_ page: Int) -> PageNavigation {
+        return .init(page, animated: false)
+    }
+
+    public init(integerLiteral value: Int) {
+        self.page = value
+        self.direction = .forward
+        self.animated = true
     }
 }
 

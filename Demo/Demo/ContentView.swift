@@ -11,7 +11,7 @@ import PageView
 
 struct ContentView: View {
 
-    @State var navigation: PageNavigation = .init(0)
+    @State var navigation: PageNavigation = 0
 
     var body: some View {
         PageView([
@@ -19,7 +19,7 @@ struct ContentView: View {
                 self.navigation.page += 1
             }),
             Button("1", action: {
-                self.navigation.page += 1
+                self.navigation = .direct(2)
             }),
             Button("2", action: {
                 self.navigation = .reverse(0)
