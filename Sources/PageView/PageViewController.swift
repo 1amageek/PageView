@@ -33,12 +33,12 @@ struct PageViewController<Page: View>: UIViewControllerRepresentable {
             navigationOrientation: orientation)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
+        print(pageViewController.gestureRecognizers)
         return pageViewController
     }
 
     func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-        pageViewController.setViewControllers(
-            [context.coordinator.controllers[currentPage]], direction: direction, animated: animated)
+        pageViewController.setViewControllers([context.coordinator.controllers[currentPage]], direction: direction, animated: animated)
     }
 
     class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {

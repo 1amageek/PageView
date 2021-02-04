@@ -7,7 +7,7 @@
 import SwiftUI
 import UIKit
 
-public struct PageNavigation: ExpressibleByIntegerLiteral {
+public struct PageNavigation: ExpressibleByIntegerLiteral, Equatable {
 
     public var page: Int
 
