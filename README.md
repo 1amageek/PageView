@@ -1,7 +1,5 @@
 # PageView
 
-A description of this package.
-
 ```swift
 struct ContentView: View {
 
