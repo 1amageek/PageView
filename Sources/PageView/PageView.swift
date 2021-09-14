@@ -187,7 +187,7 @@ extension PageView {
             _ pageViewController: UIPageViewController,
             viewControllerBefore viewController: UIViewController) -> UIViewController? {
                 let data = Array(parent.lazyMapSequence)
-                if 0 < index && index < data.count - 1 {
+                if 0 < index && index <= data.count - 1 {
                     let view = data[index - 1]
                     let viewController: UIHostingController = UIHostingController(rootView: view)
                     viewController.view.tag = index - 1
@@ -216,6 +216,7 @@ extension PageView {
             transitionCompleted completed: Bool) {
                 if completed, let visibleViewController = pageViewController.viewControllers?.first {
                     self.index = visibleViewController.view.tag
+                    self.parent.page?.wrappedValue = visibleViewController.view.tag
                 }
             }
     }
