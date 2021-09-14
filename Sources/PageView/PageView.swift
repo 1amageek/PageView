@@ -159,7 +159,7 @@ extension PageView: UIViewControllerRepresentable {
     }
 
     public func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-        if let selection = page?.wrappedValue {
+        if let selection = page?.wrappedValue, context.coordinator.index != selection {
             let viewController = viewController(index: selection)
             let direction: UIPageViewController.NavigationDirection = context.coordinator.index < selection ? .forward : .reverse
             pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
