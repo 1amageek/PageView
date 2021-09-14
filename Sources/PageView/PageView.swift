@@ -22,8 +22,6 @@ public struct PageView<Content> {
 
     public var content: Content
 
-    @State fileprivate var currentPage: Int = 0
-
     fileprivate var lazyMapSequence: LazyMapSequence<StrideTo<Int>, AnyView>
 
 }
@@ -147,46 +145,28 @@ extension PageView: UIViewControllerRepresentable {
             navigationOrientation: axis.navigationOrientation)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
+        let index = context.coordinator.index
+        let viewController = viewController(index: index)
+        pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
         return pageViewController
     }
 
+    func viewController(index: Int) -> UIViewController {
+        let view = Array(lazyMapSequence)[index]
+        let viewController = UIHostingController(rootView: view)
+        viewController.view.tag = index
+        return viewController
+    }
+
     public func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-
         if let selection = page?.wrappedValue {
-            let view = Array(lazyMapSequence)[selection]
-            let viewController = UIHostingController(rootView: view)
-            viewController.view.tag = selection
-            let direction: UIPageViewController.NavigationDirection = currentPage < selection ? .forward : .reverse
-            if let visibleViewController = pageViewController.viewControllers?.first {
-                if visibleViewController.view.tag != selection {
-                    pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
-                        if finished {
-                            self.currentPage = selection
-                        }
-                    }
-                }
-            } else {
-                pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
-                    if finished {
-                        self.currentPage = selection
-                    }
+            let viewController = viewController(index: selection)
+            let direction: UIPageViewController.NavigationDirection = context.coordinator.index < selection ? .forward : .reverse
+            pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
+                if finished {
+                    context.coordinator.index = selection
                 }
             }
-            return
-        }
-
-        if let visibleViewController = pageViewController.viewControllers?.first {
-            if visibleViewController.view.tag != currentPage {
-                let view = Array(lazyMapSequence)[currentPage]
-                let viewController = UIHostingController(rootView: view)
-                viewController.view.tag = currentPage
-                pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
-            }
-        } else {
-            let view = Array(lazyMapSequence)[currentPage]
-            let viewController = UIHostingController(rootView: view)
-            viewController.view.tag = currentPage
-            pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
         }
     }
 }
@@ -197,6 +177,8 @@ extension PageView {
 
         var parent: PageView
 
+        var index: Int = 0
+
         init(_ pageViewController: PageView) {
             parent = pageViewController
         }
@@ -204,7 +186,6 @@ extension PageView {
         public func pageViewController(
             _ pageViewController: UIPageViewController,
             viewControllerBefore viewController: UIViewController) -> UIViewController? {
-                let index = parent.currentPage
                 let data = Array(parent.lazyMapSequence)
                 if 0 < index && index < data.count - 1 {
                     let view = data[index - 1]
@@ -218,7 +199,6 @@ extension PageView {
         public func pageViewController(
             _ pageViewController: UIPageViewController,
             viewControllerAfter viewController: UIViewController) -> UIViewController? {
-                let index = parent.currentPage
                 let data = Array(parent.lazyMapSequence)
                 if 0 <= index && index < data.count - 1 {
                     let view = data[index + 1]
@@ -234,10 +214,8 @@ extension PageView {
             didFinishAnimating finished: Bool,
             previousViewControllers: [UIViewController],
             transitionCompleted completed: Bool) {
-                if completed,
-                   let visibleViewController = pageViewController.viewControllers?.first {
-                    parent.currentPage = visibleViewController.view.tag
-                    parent.page?.wrappedValue = visibleViewController.view.tag
+                if completed, let visibleViewController = pageViewController.viewControllers?.first {
+                    self.index = visibleViewController.view.tag
                 }
             }
     }
