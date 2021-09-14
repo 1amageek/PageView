@@ -8,23 +8,32 @@
 import SwiftUI
 import PageView
 
-
 struct ContentView: View {
 
-    @State var navigation: PageNavigation = 0
+    @State var selection: Int = 0
 
     var body: some View {
-        PageView([
-            Button("0", action: {
-                self.navigation.page += 1
-            }),
-            Button("1", action: {
-                self.navigation = .direct(2)
-            }),
-            Button("2", action: {
-                self.navigation = .reverse(0)
-            })
-        ], navigation: $navigation)
+
+        PageView($selection) {
+            ForEach([0, 2, 4], id: \.self) { index in
+                VStack {
+                    Text("\(index)")
+                    HStack {
+                        Button {
+                            self.selection -= 1
+                        } label: {
+                            Text("prev")
+                        }
+
+                        Button {
+                            self.selection += 1
+                        } label: {
+                            Text("next")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

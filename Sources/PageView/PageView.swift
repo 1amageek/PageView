@@ -7,98 +7,267 @@
 import SwiftUI
 import UIKit
 
-public struct PageNavigation: ExpressibleByIntegerLiteral, Equatable {
+public struct PageView<Content> {
 
-    public var page: Int
-
-    public var direction: UIPageViewController.NavigationDirection
-    
-    public var animated: Bool
-
-    public init(_ page: Int, direction: UIPageViewController.NavigationDirection = .forward, animated: Bool = true) {
-        self.page = page
-        self.direction = direction
-        self.animated = animated
+    public enum TransitionStyle {
+        case pageCurl
+        case scroll
     }
 
-    public static func forward(_ page: Int) -> PageNavigation {
-        return .init(page, direction: .forward)
-    }
+    public var axis: Axis
 
-    public static func reverse(_ page: Int) -> PageNavigation {
-        return .init(page, direction: .reverse)
-    }
+    public var transitionStyle: TransitionStyle
 
-    public static func direct(_ page: Int) -> PageNavigation {
-        return .init(page, animated: false)
-    }
+    public var page: Binding<Int>?
 
-    public init(integerLiteral value: Int) {
-        self.page = value
-        self.direction = .forward
-        self.animated = true
-    }
+    public var content: Content
+
+    @State fileprivate var currentPage: Int = 0
+
+    fileprivate var lazyMapSequence: LazyMapSequence<StrideTo<Int>, AnyView>
+
 }
 
-public struct PageConfiguration {
+extension PageView where Content: View {
 
-    public var orientation: UIPageViewController.NavigationOrientation
-
-    public var transitionStyle: UIPageViewController.TransitionStyle
-
-    public var looping: Bool
-
-    public init(orientation: UIPageViewController.NavigationOrientation = .horizontal,
-                transitionStyle: UIPageViewController.TransitionStyle = .scroll,
-                looping: Bool = false) {
-        self.orientation = orientation
+    public init<Data, ID, RowContent>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, ID, RowContent>, Data: RandomAccessCollection, ID: Hashable, RowContent: View {
+        self.axis = axis
         self.transitionStyle = transitionStyle
-        self.looping = looping
+        self.content = content()
+        let data = Array(self.content.data)
+        let content = self.content.content
+        self.lazyMapSequence = stride(from: 0, to: self.content.data.count, by: 1).lazy.map { index -> AnyView in
+            let element = data[index]
+            return AnyView(content(element))
+        }
+    }
+
+    public init<Data, ID, RowContent>(_ page: Binding<Int>, axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, ID, RowContent>, Data: RandomAccessCollection, ID: Hashable, RowContent: View {
+        self.page = page
+        self.axis = axis
+        self.transitionStyle = transitionStyle
+        self.content = content()
+        let data = Array(self.content.data)
+        let content = self.content.content
+        self.lazyMapSequence = stride(from: 0, to: self.content.data.count, by: 1).lazy.map { index -> AnyView in
+            let element = data[index]
+            return AnyView(content(element))
+        }
+    }
+
+    public init<C0, C1>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1)>, C0: View, C1: View {
+        self.axis = axis
+        self.transitionStyle = transitionStyle
+        self.content = content()
+        let value = self.content.value
+        self.lazyMapSequence = stride(from: 0, to: 2, by: 1).lazy.map { index -> AnyView in
+            switch index {
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                default: fatalError()
+            }
+        }
+    }
+
+    public init<C0, C1, C2>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2)>, C0: View, C1: View, C2: View {
+        self.axis = axis
+        self.transitionStyle = transitionStyle
+        self.content = content()
+        let value = self.content.value
+        self.lazyMapSequence = stride(from: 0, to: 3, by: 1).lazy.map { index -> AnyView in
+            switch index {
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
+                default: fatalError()
+            }
+        }
+    }
+
+    public init<C0, C1, C2, C3>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2, C3)>, C0: View, C1: View, C2: View, C3: View {
+        self.axis = axis
+        self.transitionStyle = transitionStyle
+        self.content = content()
+        let value = self.content.value
+        self.lazyMapSequence = stride(from: 0, to: 4, by: 1).lazy.map { index -> AnyView in
+            switch index {
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
+                case 3: return AnyView(value.3)
+                default: fatalError()
+            }
+        }
+    }
+
+    public init<C0, C1, C2, C3, C4>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2, C3, C4)>, C0: View, C1: View, C2: View, C3: View, C4: View {
+        self.axis = axis
+        self.transitionStyle = transitionStyle
+        self.content = content()
+        let value = self.content.value
+        self.lazyMapSequence = stride(from: 0, to: 5, by: 1).lazy.map { index -> AnyView in
+            switch index {
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
+                case 3: return AnyView(value.3)
+                case 4: return AnyView(value.4)
+                default: fatalError()
+            }
+        }
     }
 }
 
-public struct PageView<Page: View>: View {
+extension PageView.TransitionStyle {
+    var rawValue: UIPageViewController.TransitionStyle {
+        switch self {
+            case .pageCurl: return .pageCurl
+            case .scroll: return .scroll
+        }
+    }
+}
 
-    public var pages: [Page]
+extension Axis {
 
-    @Binding public var navigation: PageNavigation
+    var navigationOrientation: UIPageViewController.NavigationOrientation {
+        switch self {
+            case .horizontal: return .horizontal
+            case .vertical: return .vertical
+        }
+    }
+}
 
-    public var configuration: PageConfiguration
+extension PageView: UIViewControllerRepresentable {
 
-    public init(_ pages: [Page], navigation: Binding<PageNavigation>, configuration: PageConfiguration = PageConfiguration()) {
-        self.pages = pages
-        self._navigation = navigation
-        self.configuration = configuration
+    public func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    public func makeUIViewController(context: Context) -> UIPageViewController {
+        let pageViewController = UIPageViewController(
+            transitionStyle: transitionStyle.rawValue,
+            navigationOrientation: axis.navigationOrientation)
+        pageViewController.dataSource = context.coordinator
+        pageViewController.delegate = context.coordinator
+        return pageViewController
     }
 
-    public var body: some View {
-        PageViewController(pages: pages,
-                           currentPage: $navigation[keyPath: \.page],
-                           orientation: configuration.orientation,
-                           direction: navigation.direction,
-                           transitionStyle: configuration.transitionStyle,
-                           animated: navigation.animated,
-                           looping: configuration.looping)
+    public func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
+
+        if let selection = page?.wrappedValue {
+            let view = Array(lazyMapSequence)[selection]
+            let viewController = UIHostingController(rootView: view)
+            viewController.view.tag = selection
+            let direction: UIPageViewController.NavigationDirection = currentPage < selection ? .forward : .reverse
+            if let visibleViewController = pageViewController.viewControllers?.first {
+                if visibleViewController.view.tag != selection {
+                    pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
+                        if finished {
+                            self.currentPage = selection
+                        }
+                    }
+                }
+            } else {
+                pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
+                    if finished {
+                        self.currentPage = selection
+                    }
+                }
+            }
+            return
+        }
+
+        if let visibleViewController = pageViewController.viewControllers?.first {
+            if visibleViewController.view.tag != currentPage {
+                let view = Array(lazyMapSequence)[currentPage]
+                let viewController = UIHostingController(rootView: view)
+                viewController.view.tag = currentPage
+                pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
+            }
+        } else {
+            let view = Array(lazyMapSequence)[currentPage]
+            let viewController = UIHostingController(rootView: view)
+            viewController.view.tag = currentPage
+            pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
+        }
+    }
+}
+
+extension PageView {
+
+    public class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+
+        var parent: PageView
+
+        init(_ pageViewController: PageView) {
+            parent = pageViewController
+        }
+
+        public func pageViewController(
+            _ pageViewController: UIPageViewController,
+            viewControllerBefore viewController: UIViewController) -> UIViewController? {
+                let index = parent.currentPage
+                let data = Array(parent.lazyMapSequence)
+                if 0 < index && index < data.count - 1 {
+                    let view = data[index - 1]
+                    let viewController: UIHostingController = UIHostingController(rootView: view)
+                    viewController.view.tag = index - 1
+                    return viewController
+                }
+                return nil
+            }
+
+        public func pageViewController(
+            _ pageViewController: UIPageViewController,
+            viewControllerAfter viewController: UIViewController) -> UIViewController? {
+                let index = parent.currentPage
+                let data = Array(parent.lazyMapSequence)
+                if 0 <= index && index < data.count - 1 {
+                    let view = data[index + 1]
+                    let viewController: UIHostingController = UIHostingController(rootView: view)
+                    viewController.view.tag = index + 1
+                    return viewController
+                }
+                return nil
+            }
+
+        public func pageViewController(
+            _ pageViewController: UIPageViewController,
+            didFinishAnimating finished: Bool,
+            previousViewControllers: [UIViewController],
+            transitionCompleted completed: Bool) {
+                if completed,
+                   let visibleViewController = pageViewController.viewControllers?.first {
+                    parent.currentPage = visibleViewController.view.tag
+                    parent.page?.wrappedValue = visibleViewController.view.tag
+                }
+            }
     }
 }
 
 struct PageView_Previews: PreviewProvider {
     struct ContentView: View {
 
-        @State var navigation: PageNavigation = .init(0)
-
         var body: some View {
-            PageView([
-                Button("0", action: {
-                    self.navigation.page += 1
-                }),
-                Button("1", action: {
-                    self.navigation.page += 1
-                }),
-                Button("2", action: {
-                    self.navigation = .reverse(0)
-                })
-            ], navigation: $navigation)
+
+            Group {
+                PageView {
+                    ForEach(0..<2) { index in
+                        Text("\(index)")
+                    }
+                }
+
+                PageView {
+                    ForEach(["a", "b"], id: \.self) { index in
+                        Text("\(index)")
+                    }
+                }
+
+                PageView {
+                    Text("a")
+                    Text("b")
+                }
+            }
+
+
         }
     }
 
