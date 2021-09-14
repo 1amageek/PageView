@@ -247,7 +247,6 @@ struct PageView_Previews: PreviewProvider {
     struct ContentView: View {
 
         var body: some View {
-
             Group {
                 PageView {
                     ForEach(0..<2) { index in
@@ -266,8 +265,6 @@ struct PageView_Previews: PreviewProvider {
                     Text("b")
                 }
             }
-
-
         }
     }
 
