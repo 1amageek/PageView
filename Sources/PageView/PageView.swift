@@ -18,7 +18,7 @@ public struct PageView<SelectionValue, Content> where SelectionValue: Hashable {
 
     public var transitionStyle: TransitionStyle
 
-    public var selection: Binding<SelectionValue?>?
+    public var selection: Binding<SelectionValue>?
 
     public var content: Content
 
@@ -40,7 +40,7 @@ extension PageView where Content: View {
         }
     }
 
-    public init<Data, RowContent>(_ selection: Binding<SelectionValue?>, axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, SelectionValue, RowContent>, Data: RandomAccessCollection, Data.Element == SelectionValue, RowContent: View {
+    public init<Data, RowContent>(_ selection: Binding<SelectionValue>, axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, SelectionValue, RowContent>, Data: RandomAccessCollection, Data.Element == SelectionValue, RowContent: View {
         self.selection = selection
         self.axis = axis
         self.transitionStyle = transitionStyle
