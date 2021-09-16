@@ -8,25 +8,35 @@
 import SwiftUI
 import PageView
 
+struct Item: Identifiable, Hashable {
+    var id: String
+}
+
 struct ContentView: View {
 
-    @State var selection: Int = 0
+    @State var selection: Item?
 
     var body: some View {
 
         PageView($selection) {
-            ForEach([0, 2, 4], id: \.self) { index in
+            ForEach([
+                Item(id: "0"),
+                Item(id: "1"),
+                Item(id: "2"),
+                Item(id: "3"),
+                Item(id: "4")
+            ], id: \.self) { index in
                 VStack {
-                    Text("\(index)")
+                    Text("\(index.id)")
                     HStack {
                         Button {
-                            self.selection -= 1
+                            self.selection = Item(id: "0")
                         } label: {
                             Text("prev")
                         }
 
                         Button {
-                            self.selection += 1
+                            self.selection = Item(id: "4")
                         } label: {
                             Text("next")
                         }
