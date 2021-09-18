@@ -168,7 +168,13 @@ extension PageView: UIViewControllerRepresentable {
                         context.coordinator.index = index
                     }
                 }
+            } else {
+                let viewController = viewController(index: context.coordinator.index)
+                pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
             }
+        } else {
+            let viewController = viewController(index: context.coordinator.index)
+            pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
         }
     }
 }

@@ -16,29 +16,35 @@ struct ContentView: View {
 
     @State var selection: Item = Item(id: "1")
 
+    @State var value: Float = 0
+
     var body: some View {
 
-        PageView($selection) {
-            ForEach([
-                Item(id: "0"),
-                Item(id: "1"),
-                Item(id: "2"),
-                Item(id: "3"),
-                Item(id: "4")
-            ], id: \.self) { index in
-                VStack {
-                    Text("\(index.id)")
-                    HStack {
-                        Button {
-                            self.selection = Item(id: "0")
-                        } label: {
-                            Text("prev")
-                        }
+        VStack {
+            Slider(value: $value)
+            PageView($selection) {
+                ForEach([
+                    Item(id: "0"),
+                    Item(id: "1"),
+                    Item(id: "2"),
+                    Item(id: "3"),
+                    Item(id: "4")
+                ], id: \.self) { index in
+                    VStack {
+                        Text("\(index.id)")
+                        Text("\(value)")
+                        HStack {
+                            Button {
+                                self.selection = Item(id: "0")
+                            } label: {
+                                Text("prev")
+                            }
 
-                        Button {
-                            self.selection = Item(id: "4")
-                        } label: {
-                            Text("next")
+                            Button {
+                                self.selection = Item(id: "4")
+                            } label: {
+                                Text("next")
+                            }
                         }
                     }
                 }
