@@ -233,7 +233,7 @@ extension PageView {
             viewControllerAfter viewController: UIViewController) -> UIViewController? {
                 let data = parent.data
                 if 0 <= index && index < data.count - 1 {
-                    let data = data[index - 1]
+                    let data = data[index + 1]
                     let view = self.parent.page(data)
                     let viewController: UIHostingController = UIHostingController(rootView: view)
                     viewController.view.tag = index + 1
