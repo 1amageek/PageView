@@ -180,7 +180,7 @@ extension PageView: UIViewControllerRepresentable {
                     }
                 }
             } else {
-                if let viewControllers = pageViewController.viewControllers {
+                if let viewControllers = pageViewController.viewControllers, !viewControllers.isEmpty {
                     updateUIView(viewControllers)
                 } else {
                     let viewController = viewController(index: context.coordinator.index)
@@ -188,7 +188,7 @@ extension PageView: UIViewControllerRepresentable {
                 }
             }
         } else {
-            if let viewControllers = pageViewController.viewControllers {
+            if let viewControllers = pageViewController.viewControllers, !viewControllers.isEmpty {
                 updateUIView(viewControllers)
             } else {
                 let viewController = viewController(index: context.coordinator.index)
