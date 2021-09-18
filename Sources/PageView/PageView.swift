@@ -181,8 +181,12 @@ extension PageView: UIViewControllerRepresentable {
                         }
                     }
                 } else {
-                    let viewController = viewController(index: index)
-                    pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+                    if let viewControllers = pageViewController.viewControllers, !viewControllers.isEmpty {
+                        updateUIView(viewControllers)
+                    } else {
+                        let viewController = viewController(index: index)
+                        pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+                    }
                 }
             } else {
                 if let viewControllers = pageViewController.viewControllers, !viewControllers.isEmpty {
