@@ -169,16 +169,20 @@ extension PageView: UIViewControllerRepresentable {
                     }
                 }
             } else {
-                if let viewController = pageViewController.viewControllers?.last as? UIHostingController<AnyView> {
-                    let (_, view) = Array(lazyMapSequence)[context.coordinator.index]
-                    viewController.rootView = view
-                }
+                pageViewController.viewControllers?.forEach({ viewController in
+                    if let viewController = viewController as? UIHostingController<AnyView> {
+                        let (_, view) = Array(lazyMapSequence)[viewController.view.tag]
+                        viewController.rootView = view
+                    }
+                })
             }
         } else {
-            if let viewController = pageViewController.viewControllers?.last as? UIHostingController<AnyView> {
-                let (_, view) = Array(lazyMapSequence)[context.coordinator.index]
-                viewController.rootView = view
-            }
+            pageViewController.viewControllers?.forEach({ viewController in
+                if let viewController = viewController as? UIHostingController<AnyView> {
+                    let (_, view) = Array(lazyMapSequence)[viewController.view.tag]
+                    viewController.rootView = view
+                }
+            })
         }
     }
 }
@@ -193,6 +197,15 @@ extension PageView {
 
         init(_ pageViewController: PageView) {
             parent = pageViewController
+        }
+
+        public func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+            pendingViewControllers.forEach({ viewController in
+                if let viewController = viewController as? UIHostingController<AnyView> {
+                    let (_, view) = Array(parent.lazyMapSequence)[viewController.view.tag]
+                    viewController.rootView = view
+                }
+            })
         }
 
         public func pageViewController(
