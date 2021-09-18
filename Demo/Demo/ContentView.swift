@@ -30,20 +30,22 @@ struct ContentView: View {
                     Item(id: "3"),
                     Item(id: "4")
                 ], id: \.self) { index in
-                    VStack {
-                        Text("\(index.id)")
-                        Text("\(value)")
-                        HStack {
-                            Button {
-                                self.selection = Item(id: "0")
-                            } label: {
-                                Text("prev")
-                            }
+                    ScrollView {
+                        VStack {
+                            Text("\(index.id)")
+                            Text("\(value)")
+                            HStack {
+                                Button {
+                                    self.selection = Item(id: "0")
+                                } label: {
+                                    Text("prev")
+                                }
 
-                            Button {
-                                self.selection = Item(id: "4")
-                            } label: {
-                                Text("next")
+                                Button {
+                                    self.selection = Item(id: "4")
+                                } label: {
+                                    Text("next")
+                                }
                             }
                         }
                     }

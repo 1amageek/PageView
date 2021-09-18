@@ -169,12 +169,16 @@ extension PageView: UIViewControllerRepresentable {
                     }
                 }
             } else {
-                let viewController = viewController(index: context.coordinator.index)
-                pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+                if let viewController = pageViewController.viewControllers?.last as? UIHostingController<AnyView> {
+                    let (_, view) = Array(lazyMapSequence)[context.coordinator.index]
+                    viewController.rootView = view
+                }
             }
         } else {
-            let viewController = viewController(index: context.coordinator.index)
-            pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+            if let viewController = pageViewController.viewControllers?.last as? UIHostingController<AnyView> {
+                let (_, view) = Array(lazyMapSequence)[context.coordinator.index]
+                viewController.rootView = view
+            }
         }
     }
 }
