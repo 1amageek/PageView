@@ -180,10 +180,20 @@ extension PageView: UIViewControllerRepresentable {
                     }
                 }
             } else {
-                updateUIView(pageViewController.viewControllers)
+                if let viewControllers = pageViewController.viewControllers {
+                    updateUIView(viewControllers)
+                } else {
+                    let viewController = viewController(index: context.coordinator.index)
+                    pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+                }
             }
         } else {
-            updateUIView(pageViewController.viewControllers)
+            if let viewControllers = pageViewController.viewControllers {
+                updateUIView(viewControllers)
+            } else {
+                let viewController = viewController(index: context.coordinator.index)
+                pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
+            }
         }
     }
 }
