@@ -14,7 +14,7 @@ struct Item: Identifiable, Hashable {
 
 struct ContentView: View {
 
-    @State var selection: Item = Item(id: "1")
+    @State var selection: Item = Item(id: "3")
 
     @State var value: Float = 0
 

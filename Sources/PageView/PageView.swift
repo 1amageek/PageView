@@ -171,13 +171,18 @@ extension PageView: UIViewControllerRepresentable {
     
     public func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
         if let selection = selection?.wrappedValue {
-            if let index = self.data.firstIndex(of: selection), context.coordinator.index != index {
-                let viewController = viewController(index: index)
-                let direction: UIPageViewController.NavigationDirection = context.coordinator.index < index ? .forward : .reverse
-                pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
-                    if finished {
-                        context.coordinator.index = index
+            if let index = self.data.firstIndex(of: selection) {
+                if context.coordinator.index != index {
+                    let viewController = viewController(index: index)
+                    let direction: UIPageViewController.NavigationDirection = context.coordinator.index < index ? .forward : .reverse
+                    pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
+                        if finished {
+                            context.coordinator.index = index
+                        }
                     }
+                } else {
+                    let viewController = viewController(index: index)
+                    pageViewController.setViewControllers([viewController], direction: .forward, animated: false, completion: nil)
                 }
             } else {
                 if let viewControllers = pageViewController.viewControllers, !viewControllers.isEmpty {
