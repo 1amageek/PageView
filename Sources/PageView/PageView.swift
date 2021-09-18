@@ -8,108 +8,111 @@ import SwiftUI
 import UIKit
 
 public struct PageView<SelectionValue, Content> where SelectionValue: Hashable {
-
+    
     public enum TransitionStyle {
         case pageCurl
         case scroll
     }
-
+    
     public var axis: Axis
-
+    
     public var transitionStyle: TransitionStyle
-
+    
     public var selection: Binding<SelectionValue>?
-
+    
     public var content: Content
-
-    fileprivate var lazyMapSequence: LazyMapSequence<StrideTo<Int>, (SelectionValue, AnyView)>
-
+    
+    fileprivate var data: Array<SelectionValue>
+    
+    fileprivate var page: (SelectionValue) -> AnyView
 }
 
 extension PageView where Content: View {
-
-    public init<Data, ID, RowContent>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, ID, RowContent>, Data: RandomAccessCollection, ID: Hashable, Data.Element == SelectionValue, RowContent: View {
+    
+    public init<Data, ID, InContent>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, ID, InContent>, Data: RandomAccessCollection, ID: Hashable, Data.Element == SelectionValue, InContent: View {
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
-        let data = Array(self.content.data)
+        self.data = Array(self.content.data)
         let content = self.content.content
-        self.lazyMapSequence = stride(from: 0, to: self.content.data.count, by: 1).lazy.map { index -> (Data.Element, AnyView) in
-            let element = data[index]
-            return (element, AnyView(content(element)))
+        self.page = { data -> AnyView in
+            return AnyView(content(data))
         }
     }
-
-    public init<Data, RowContent>(_ selection: Binding<SelectionValue>, axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, SelectionValue, RowContent>, Data: RandomAccessCollection, Data.Element == SelectionValue, RowContent: View {
+    
+    public init<Data, InContent>(_ selection: Binding<SelectionValue>, axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == ForEach<Data, SelectionValue, InContent>, Data: RandomAccessCollection, Data.Element == SelectionValue, InContent: View {
         self.selection = selection
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
-        let data = Array(self.content.data)
+        self.data = Array(self.content.data)
         let content = self.content.content
-        self.lazyMapSequence = stride(from: 0, to: self.content.data.count, by: 1).lazy.map { index -> (Data.Element, AnyView) in
-            let element = data[index]
-            return (element, AnyView(content(element)))
+        self.page = { data -> AnyView in
+            return AnyView(content(data))
         }
     }
-
+    
     public init<C0, C1>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1)>, C0: View, C1: View, SelectionValue == Int {
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
         let value = self.content.value
-        self.lazyMapSequence = stride(from: 0, to: 2, by: 1).lazy.map { index -> (Int, AnyView) in
+        self.data = Array(0..<2)
+        self.page = { index -> AnyView in
             switch index {
-                case 0: return (0, AnyView(value.0))
-                case 1: return (1, AnyView(value.1))
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
                 default: fatalError()
             }
         }
     }
-
+    
     public init<C0, C1, C2>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2)>, C0: View, C1: View, C2: View, SelectionValue == Int {
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
         let value = self.content.value
-        self.lazyMapSequence = stride(from: 0, to: 3, by: 1).lazy.map { index -> (Int, AnyView) in
+        self.data = Array(0..<3)
+        self.page = { index -> AnyView in
             switch index {
-                case 0: return (0, AnyView(value.0))
-                case 1: return (1, AnyView(value.1))
-                case 2: return (2, AnyView(value.2))
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
                 default: fatalError()
             }
         }
     }
-
+    
     public init<C0, C1, C2, C3>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2, C3)>, C0: View, C1: View, C2: View, C3: View, SelectionValue == Int {
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
         let value = self.content.value
-        self.lazyMapSequence = stride(from: 0, to: 4, by: 1).lazy.map { index -> (Int, AnyView) in
+        self.data = Array(0..<4)
+        self.page = { index -> AnyView in
             switch index {
-                case 0: return (0, AnyView(value.0))
-                case 1: return (1, AnyView(value.1))
-                case 2: return (2, AnyView(value.2))
-                case 3: return (3, AnyView(value.3))
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
+                case 3: return AnyView(value.3)
                 default: fatalError()
             }
         }
     }
-
+    
     public init<C0, C1, C2, C3, C4>(axis: Axis = .horizontal, transitionStyle: TransitionStyle = .scroll, @ViewBuilder content: () -> Content) where Content == TupleView<(C0, C1, C2, C3, C4)>, C0: View, C1: View, C2: View, C3: View, C4: View, SelectionValue == Int {
         self.axis = axis
         self.transitionStyle = transitionStyle
         self.content = content()
         let value = self.content.value
-        self.lazyMapSequence = stride(from: 0, to: 5, by: 1).lazy.map { index -> (Int, AnyView) in
+        self.data = Array(0..<5)
+        self.page = { index -> AnyView in
             switch index {
-                case 0: return (0, AnyView(value.0))
-                case 1: return (1, AnyView(value.1))
-                case 2: return (2, AnyView(value.2))
-                case 3: return (3, AnyView(value.3))
-                case 4: return (4, AnyView(value.4))
+                case 0: return AnyView(value.0)
+                case 1: return AnyView(value.1)
+                case 2: return AnyView(value.2)
+                case 3: return AnyView(value.3)
+                case 4: return AnyView(value.4)
                 default: fatalError()
             }
         }
@@ -126,7 +129,7 @@ extension PageView.TransitionStyle {
 }
 
 extension Axis {
-
+    
     var navigationOrientation: UIPageViewController.NavigationOrientation {
         switch self {
             case .horizontal: return .horizontal
@@ -136,31 +139,39 @@ extension Axis {
 }
 
 extension PageView: UIViewControllerRepresentable {
-
+    
     public func makeCoordinator() -> Coordinator { Coordinator(self) }
-
+    
     public func makeUIViewController(context: Context) -> UIPageViewController {
         let pageViewController = UIPageViewController(
             transitionStyle: transitionStyle.rawValue,
             navigationOrientation: axis.navigationOrientation)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
-        let index = context.coordinator.index
-        let viewController = viewController(index: index)
-        pageViewController.setViewControllers([viewController], direction: .forward, animated: true)
         return pageViewController
     }
-
+    
     func viewController(index: Int) -> UIViewController {
-        let (_, view) = Array(lazyMapSequence)[index]
+        let data = self.data[index]
+        let view = self.page(data)
         let viewController = UIHostingController(rootView: view)
         viewController.view.tag = index
         return viewController
     }
-
+    
+    func updateUIView(_ viewControllers: [UIViewController]?) {
+        viewControllers?.forEach({ viewController in
+            if let viewController = viewController as? UIHostingController<AnyView> {
+                let data = self.data[viewController.view.tag]
+                let view = self.page(data)
+                viewController.rootView = view
+            }
+        })
+    }
+    
     public func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
         if let selection = selection?.wrappedValue {
-            if let index = Array(lazyMapSequence).firstIndex(where: { $0.0 == selection }), context.coordinator.index != index {
+            if let index = self.data.firstIndex(of: selection), context.coordinator.index != index {
                 let viewController = viewController(index: index)
                 let direction: UIPageViewController.NavigationDirection = context.coordinator.index < index ? .forward : .reverse
                 pageViewController.setViewControllers([viewController], direction: direction, animated: true) { finished in
@@ -169,71 +180,58 @@ extension PageView: UIViewControllerRepresentable {
                     }
                 }
             } else {
-                pageViewController.viewControllers?.forEach({ viewController in
-                    if let viewController = viewController as? UIHostingController<AnyView> {
-                        let (_, view) = Array(lazyMapSequence)[viewController.view.tag]
-                        viewController.rootView = view
-                    }
-                })
+                updateUIView(pageViewController.viewControllers)
             }
         } else {
-            pageViewController.viewControllers?.forEach({ viewController in
-                if let viewController = viewController as? UIHostingController<AnyView> {
-                    let (_, view) = Array(lazyMapSequence)[viewController.view.tag]
-                    viewController.rootView = view
-                }
-            })
+            updateUIView(pageViewController.viewControllers)
         }
     }
 }
 
 extension PageView {
-
+    
     public class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-
+        
         var parent: PageView
-
+        
         var index: Int = 0
-
+        
         init(_ pageViewController: PageView) {
             parent = pageViewController
         }
-
+        
         public func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
-            pendingViewControllers.forEach({ viewController in
-                if let viewController = viewController as? UIHostingController<AnyView> {
-                    let (_, view) = Array(parent.lazyMapSequence)[viewController.view.tag]
-                    viewController.rootView = view
-                }
-            })
+            parent.updateUIView(pageViewController.viewControllers)
         }
-
+        
         public func pageViewController(
             _ pageViewController: UIPageViewController,
             viewControllerBefore viewController: UIViewController) -> UIViewController? {
-                let data = Array(parent.lazyMapSequence)
+                let data = parent.data
                 if 0 < index && index <= data.count - 1 {
-                    let (_, view) = data[index - 1]
+                    let data = data[index - 1]
+                    let view = self.parent.page(data)
                     let viewController: UIHostingController = UIHostingController(rootView: view)
                     viewController.view.tag = index - 1
                     return viewController
                 }
                 return nil
             }
-
+        
         public func pageViewController(
             _ pageViewController: UIPageViewController,
             viewControllerAfter viewController: UIViewController) -> UIViewController? {
-                let data = Array(parent.lazyMapSequence)
+                let data = parent.data
                 if 0 <= index && index < data.count - 1 {
-                    let (_, view) = data[index + 1]
+                    let data = data[index - 1]
+                    let view = self.parent.page(data)
                     let viewController: UIHostingController = UIHostingController(rootView: view)
                     viewController.view.tag = index + 1
                     return viewController
                 }
                 return nil
             }
-
+        
         public func pageViewController(
             _ pageViewController: UIPageViewController,
             didFinishAnimating finished: Bool,
@@ -241,7 +239,7 @@ extension PageView {
             transitionCompleted completed: Bool) {
                 if completed, let visibleViewController = pageViewController.viewControllers?.first {
                     self.index = visibleViewController.view.tag
-                    self.parent.selection?.wrappedValue = Array(parent.lazyMapSequence)[self.index].0
+                    self.parent.selection?.wrappedValue = self.parent.data[self.index]
                 }
             }
     }
@@ -249,7 +247,7 @@ extension PageView {
 
 struct PageView_Previews: PreviewProvider {
     struct ContentView: View {
-
+        
         var body: some View {
             Group {
                 PageView {
@@ -257,13 +255,13 @@ struct PageView_Previews: PreviewProvider {
                         Text("\(index)")
                     }
                 }
-
+                
                 PageView {
                     ForEach(["a", "b"], id: \.self) { index in
                         Text("\(index)")
                     }
                 }
-
+                
                 PageView {
                     Text("a")
                     Text("b")
@@ -271,7 +269,7 @@ struct PageView_Previews: PreviewProvider {
             }
         }
     }
-
+    
     static var previews: some View {
         ContentView()
     }
